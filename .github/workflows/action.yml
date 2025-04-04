@@ -36,13 +36,8 @@ jobs:
             
             # Stop existing process
             pm2 delete "portpolio" || true
+            cd public
             
-            # Ensure correct path
-            if [ ! -f "public/index.js" ]; then
-              echo "Error: public/index.js not found!"
-              exit 1
-            fi
-
-            # Start Node.js server from the correct path
-            pm2 start public/index.js --name "portpolio"
+            # Start Node.js server
+            pm2 start index.js --name "portpolio"
             pm2 save
