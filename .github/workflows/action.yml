@@ -36,7 +36,6 @@ jobs:
             
             # Stop existing process
             pm2 delete "portpolio" || true
-            cd public
             
             # Start Node.js server
             pm2 start index.js --name "portpolio"
