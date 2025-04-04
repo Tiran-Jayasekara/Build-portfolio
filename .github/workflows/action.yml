@@ -1,0 +1,42 @@
+name: Deploy Portpolio
+
+on:
+  push:
+    branches:
+      - staging
+      - deploy
+      - main
+
+jobs:
+  deploy_qa:
+    if: github.ref == 'refs/heads/deploy'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Connect with VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            mkdir -p apps/portpolio && cd apps/portpolio
+
+            if [ -d ".git" ]; then
+              git reset --hard
+              git pull origin deploy
+            else
+              git clone -b deploy git@github.com:Tiran-Jayasekara/Build-portfolio.git .
+            fi
+            
+            npm install --force
+            
+            # Stop existing process
+            pm2 delete "portpolio" || true
+            
+            # Start Node.js server
+            pm2 start "node index.js" --name "portpolio"
+            pm2 save
